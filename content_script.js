@@ -15,3 +15,15 @@ window.addEventListener('message', (event) => {
     });
   }
 });
+
+// Listen for vegetation status updates coming from the background script
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg?.type === 'veg:status') {
+    // Forward the status to the page so the DOM can react
+    window.postMessage({
+      type: 'veg:status',
+      status: msg.status,
+      error: msg.error
+    }, '*');
+  }
+});
