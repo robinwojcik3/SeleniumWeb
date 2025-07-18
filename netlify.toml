@@ -1,4 +1,0 @@
-# Fichier volontairement laissé vide.
-# Pour un site statique simple sans étape de build, la configuration par défaut de Netlify est suffisante.
-# Netlify déploiera automatiquement les fichiers depuis la racine du dépôt.
-# La configuration [build] précédente (publish = "/") était superflue et potentiellement source d'erreur.
