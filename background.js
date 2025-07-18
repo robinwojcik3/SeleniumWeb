@@ -7,6 +7,13 @@ let lastProcessed = 0;
 // Id of the ArcGIS tab reused between analyses
 let arcgisTabId = null;
 
+// Send a veg:init message when the ArcGIS tab finishes loading
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (tabId === arcgisTabId && changeInfo.status === 'complete') {
+    chrome.tabs.sendMessage(tabId, { type: 'veg:init' });
+  }
+});
+
 /**
  * Convert WGS84 latitude/longitude to Web Mercator coordinates.
  * @param {number} lat Latitude in decimal degrees

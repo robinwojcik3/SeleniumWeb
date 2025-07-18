@@ -14,6 +14,7 @@
     {
       "matches": ["https://www.arcgis.com/apps/webappviewer/*"],
       "js": ["arcgis_veg.js"],
+      "type": "module",
       "run_at": "document_idle"
     }
   ],
