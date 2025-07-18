@@ -16,20 +16,72 @@
 <div id="coords">Cliquez sur la carte pour afficher les coordonnées</div>
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 <script>
+  // Initialise the map and its tile layer
   var map = L.map('map').setView([0, 0], 2);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
-  map.on('click', function(e) {
-    var lat = e.latlng.lat.toFixed(6);
-    var lon = e.latlng.lng.toFixed(6);
-    document.getElementById('coords').textContent = 'Latitude: ' + lat + ', Longitude: ' + lon;
-    // Send the coordinates to the Chrome extension via window.postMessage
+
+  // Currently displayed temporary marker (if any)
+  var pendingMarker;
+
+  /**
+   * Remove the temporary marker and associated listeners.
+   */
+  function clearPending() {
+    if (pendingMarker) {
+      pendingMarker.off('popupclose', clearPending);
+      map.removeLayer(pendingMarker);
+      pendingMarker = null;
+    }
+  }
+
+  /**
+   * Send the selected coordinates to the extension and reset the map state.
+   * @param {number} lat
+   * @param {number} lon
+   */
+  function sendCoords(lat, lon) {
     window.postMessage({
       type: 'coords',
-      payload: { lat: lat, lon: lon }
+      payload: { lat: Number(lat.toFixed(6)), lon: Number(lon.toFixed(6)) }
     }, '*');
+    clearPending();
+  }
+
+  // When the user clicks on the map, show a confirmation popup
+  map.on('click', function(e) {
+    clearPending();
+
+    var lat = e.latlng.lat;
+    var lon = e.latlng.lng;
+
+    // Display the clicked coordinates below the map
+    document.getElementById('coords').textContent =
+      'Latitude: ' + lat.toFixed(6) + ', Longitude: ' + lon.toFixed(6);
+
+    // Create a marker at the clicked position
+    pendingMarker = L.marker([lat, lon]).addTo(map);
+
+    // Build popup content with confirmation button
+    var container = L.DomUtil.create('div');
+    container.appendChild(document.createTextNode(
+      'Voulez-vous lancer l\u2019analyse sur ce point ? '
+    ));
+    var btn = L.DomUtil.create('button', '', container);
+    btn.id = 'run-analysis';
+    btn.textContent = 'Oui';
+
+    // Display the popup and remove the marker if closed without validation
+    pendingMarker.bindPopup(container).openPopup();
+    pendingMarker.on('popupclose', clearPending);
+
+    // When the user confirms, send the message and reset everything
+    btn.addEventListener('click', function(ev) {
+      L.DomEvent.stopPropagation(ev);
+      sendCoords(lat, lon);
+    });
   });
 </script>
 </body>
