@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaflet Map Coordinates</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-mZZ5lC8gKraPzQZkNJHm6SMGKcBsVYNHx8BfDLKfBBA="
+    crossorigin=""
+  />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    #map {
+      height: 80vh; /* take most vertical space */
+      width: 100%;
+    }
+    #coords {
+      padding: 1em;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="coords">Cliquez sur la carte pour obtenir les coordonnées.</div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1j7kGgLnKZ9MXO2sEmsGTP8jDmE+5dTZ+HroIk0M="
+    crossorigin=""
+  ></script>
+  <script>
+    // Initialize the map centered on [0, 0] with zoom level 2
+    var map = L.map('map').setView([0, 0], 2);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Click handler to display coordinates
+    map.on('click', function(e) {
+      var lat = e.latlng.lat.toFixed(5);
+      var lng = e.latlng.lng.toFixed(5);
+      document.getElementById('coords').textContent =
+        'Latitude: ' + lat + ' | Longitude: ' + lng;
+    });
+  </script>
+</body>
+</html>
