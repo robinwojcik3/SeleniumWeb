@@ -3,18 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte Interactive</title>
+    <title>Carte Interactive OpenTopoMap</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIINfQPDSAOXeHYYVA/YFzkenGFadEvF28xQ="
-        crossorigin=""/>
-    <link rel="stylesheet" href="style.css">
+          integrity="sha256-p4NxAoJBhIINfQPDSAOXeHYYVA/YFzkenGFadEvF28xQ="
+          crossorigin=""/>
+
+    <style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Empêche l'apparition de barres de défilement */
+            font-family: sans-serif;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+            background-color: #eee; /* Couleur de fond en cas de chargement lent des tuiles */
+        }
+        .error-container {
+            padding: 20px;
+            text-align: center;
+            color: #c0392b;
+            background-color: #f9ebea;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .error-container code {
+            background-color: #e5e7e9;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
+    
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nSL00XLpItrh7K/i1h12F7o5O+Y6tqN2F4X6fLh74="
-        crossorigin=""></script>
-    <script src="script.js"></script>
+            integrity="sha256-20nSL00XLpItrh7K/i1h12F7o5O+Y6tqN2F4X6fLh74="
+            crossorigin=""></script>
+
+    <script>
+        try {
+            // Vérification que la librairie Leaflet (objet L) est bien chargée.
+            if (typeof L === 'undefined') {
+                throw new Error("La librairie Leaflet (L) n'a pas pu être chargée. Vérifiez la connexion au CDN.");
+            }
+
+            // 1. Initialisation de la carte Leaflet
+            const map = L.map('map').setView([45.1885, 5.7245], 13); // Centrage sur Grenoble
+
+            // 2. Ajout du fond de carte OpenTopoMap
+            L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                maxZoom: 17,
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            }).addTo(map);
+
+            let selectedMarker = null;
+
+            // 3. Gestionnaire d'événement pour le clic sur la carte
+            map.on('click', function(e) {
+                if (selectedMarker) {
+                    map.removeLayer(selectedMarker);
+                }
+                selectedMarker = L.marker(e.latlng)
+                    .addTo(map)
+                    .bindPopup(`<b>Coordonnées du point</b><br>Latitude: ${e.latlng.lat.toFixed(5)}<br>Longitude: ${e.latlng.lng.toFixed(5)}`)
+                    .openPopup();
+                console.log(`Point sélectionné : Latitude: ${e.latlng.lat}, Longitude: ${e.latlng.lng}`);
+            });
+
+        } catch (error) {
+            // 4. Gestion d'erreur : Affiche un message clair si l'initialisation échoue
+            const mapContainer = document.getElementById('map');
+            mapContainer.innerHTML = `
+                <div class="error-container">
+                    <h2>Erreur Critique</h2>
+                    <p>Impossible d'initialiser la carte interactive.</p>
+                    <p><strong>Message :</strong> <code>${error.message}</code></p>
+                </div>
+            `;
+            console.error("Erreur d'initialisation de la carte Leaflet :", error);
+        }
+    </script>
+
 </body>
 </html>
