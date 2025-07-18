@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carte interactive Leaflet</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-o9N1j8Mf8x3jt6MbGwA+6CjjIIT5IpLZza6X1P50k00=" crossorigin="" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      height: 80vh;
+    }
+    #coords {
+      padding: 10px;
+      font-size: 1em;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="coords">Cliquez sur la carte pour obtenir les coordonnées.</div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-oVeTS2H6vs2LvY0ScuE0raHuiW1qIUIqMaZLNbA+n0w=" crossorigin=""></script>
+  <script>
+    var map = L.map('map').setView([48.85837, 2.294481], 13); // Paris
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    var coordsDiv = document.getElementById('coords');
+
+    function onMapClick(e) {
+      var lat = e.latlng.lat.toFixed(6);
+      var lng = e.latlng.lng.toFixed(6);
+      coordsDiv.textContent = 'Latitude : ' + lat + ' | Longitude : ' + lng;
+    }
+
+    map.on('click', onMapClick);
+  </script>
+</body>
+</html>
