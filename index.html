@@ -12,6 +12,18 @@
 </style>
 </head>
 <body>
+<form id="veg-options" style="padding:4px;font-family:sans-serif;">
+  <label for="transparency">Transparence (%) </label>
+  <input type="range" id="transparency" min="0" max="100" value="50">
+  <label for="scaleMin" style="margin-left:8px;">Échelle mini </label>
+  <input id="scaleMin" list="scales">
+  <datalist id="scales">
+    <option value="1:100"></option>
+    <option value="1:1 000"></option>
+    <option value="1:25 000"></option>
+    <option value="1:100 000"></option>
+  </datalist>
+</form>
 <div id="map"></div>
 <div id="coords">Cliquez sur la carte pour afficher les coordonnées</div>
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -42,10 +54,11 @@
    * @param {number} lat
    * @param {number} lon
    */
-  function sendCoords(lat, lon) {
+  function sendCoords(lat, lon, options) {
     window.postMessage({
       type: 'coords',
-      payload: { lat: Number(lat.toFixed(6)), lon: Number(lon.toFixed(6)) }
+      payload: { lat: Number(lat.toFixed(6)), lon: Number(lon.toFixed(6)) },
+      options
     }, '*');
     clearPending();
   }
@@ -80,7 +93,12 @@
     // When the user confirms, send the message and reset everything
     btn.addEventListener('click', function(ev) {
       L.DomEvent.stopPropagation(ev);
-      sendCoords(lat, lon);
+      var transparency = document.getElementById('transparency').value;
+      var scaleMin = document.getElementById('scaleMin').value;
+      sendCoords(lat, lon, {
+        scaleMin: scaleMin,
+        transparency: Number(transparency) / 100
+      });
     });
   });
 </script>
