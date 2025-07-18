@@ -25,7 +25,10 @@
     var lat = e.latlng.lat.toFixed(6);
     var lng = e.latlng.lng.toFixed(6);
     document.getElementById('coords').textContent = 'Latitude: ' + lat + ', Longitude: ' + lng;
+    // envoyer les coordonnees a l'extension
+    window.postMessage({ type: "coords", payload: { lat: lat, lon: lng } }, "*");
   });
 </script>
 </body>
 </html>
+

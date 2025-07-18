@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Leaflet Coordinates Listener",
+  "version": "1.0",
+  "description": "Listen to Leaflet clicks and log coords in background.",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
