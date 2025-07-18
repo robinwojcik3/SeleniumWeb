@@ -23,8 +23,13 @@
   }).addTo(map);
   map.on('click', function(e) {
     var lat = e.latlng.lat.toFixed(6);
-    var lng = e.latlng.lng.toFixed(6);
-    document.getElementById('coords').textContent = 'Latitude: ' + lat + ', Longitude: ' + lng;
+    var lon = e.latlng.lng.toFixed(6);
+    document.getElementById('coords').textContent = 'Latitude: ' + lat + ', Longitude: ' + lon;
+    // Send the coordinates to the Chrome extension via window.postMessage
+    window.postMessage({
+      type: 'coords',
+      payload: { lat: lat, lon: lon }
+    }, '*');
   });
 </script>
 </body>
