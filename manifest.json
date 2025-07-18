@@ -10,6 +10,14 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content_script.js"]
+    },
+    {
+      "matches": ["https://www.arcgis.com/apps/webappviewer/*"],
+      "js": ["arcgis_veg.js"],
+      "run_at": "document_idle"
     }
+  ],
+  "host_permissions": [
+    "https://www.arcgis.com/*"
   ]
 }
