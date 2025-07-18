@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Leaflet Coordinates Listener",
+  "version": "1.0",
+  "description": "Listen for coordinates posted from a Leaflet map and log them.",
+  "permissions": [],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Coords Listener"
+  }
+}
