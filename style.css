@@ -1,11 +1,12 @@
 html, body {
-    height: 100%; /* Ajout pour que la hauteur soit héritée par #map */
+    height: 100%;
+    width: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: hidden; /* Empêche les barres de défilement */
 }
 
 #map {
-    width: 100vw;
-    height: 100vh;
+    height: 100%;
+    width: 100%;
 }
