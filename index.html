@@ -24,6 +24,7 @@
     <option value="1:100 000"></option>
   </datalist>
 </form>
+<div id="status" style="padding:8px;font-family:sans-serif;"></div>
 <div id="map"></div>
 <div id="coords">Cliquez sur la carte pour afficher les coordonnées</div>
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -37,6 +38,30 @@
 
   // Currently displayed temporary marker (if any)
   var pendingMarker;
+
+  // Display element for vegetation layer status
+  var statusEl = document.getElementById('status');
+  var hideTimer;
+
+  // Listen for status messages coming from the extension
+  window.addEventListener('message', function(ev) {
+    if (ev.data && ev.data.type === 'veg:status') {
+      if (ev.data.status === 'ready') {
+        statusEl.textContent = '✓ Végétation appliquée';
+        statusEl.style.background = '#c8e6c9';
+        statusEl.style.color = '#2e7d32';
+      } else {
+        statusEl.textContent = '✗ Échec: ' + ev.data.error;
+        statusEl.style.background = '#ffcdd2';
+        statusEl.style.color = '#c62828';
+      }
+      statusEl.style.display = 'block';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(function() {
+        statusEl.style.display = 'none';
+      }, 5000);
+    }
+  });
 
   /**
    * Remove the temporary marker and associated listeners.
