@@ -1,11 +1,11 @@
 // arcgis_veg.js - ES module to configure the vegetation layer on ArcGIS
 const TIMEOUT = 15000;
 
-function waitForElement(selectorOrFn, timeout = TIMEOUT) {
+export function waitForElement(selectorOrFn, root = document, timeout = TIMEOUT) {
   return new Promise((resolve, reject) => {
     const end = Date.now() + timeout;
     const check = () => {
-      const el = typeof selectorOrFn === 'function' ? selectorOrFn() : document.querySelector(selectorOrFn);
+      const el = typeof selectorOrFn === 'function' ? selectorOrFn() : root.querySelector(selectorOrFn);
       if (el) {
         cleanup();
         resolve(el);
@@ -27,7 +27,8 @@ function waitForElement(selectorOrFn, timeout = TIMEOUT) {
     if (check()) return;
 
     const observer = new MutationObserver(check);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    const target = root instanceof Document ? root.documentElement : root;
+    observer.observe(target, { childList: true, subtree: true });
 
     const timer = setTimeout(() => {
       cleanup();
@@ -36,8 +37,10 @@ function waitForElement(selectorOrFn, timeout = TIMEOUT) {
   });
 }
 
-export async function configureVegetationLayer({ scaleMin = '1:100', transparency = 0.5 } = {}) {
+async function configureVegetationLayer({ scaleMin = '1:100', transparency = 0.5 } = {}) {
+  console.time('[veg] total');
   const log = (msg) => console.log(`[veg] ${msg}`);
+  const scale = String(scaleMin).replace(/[\s\u00A0]/g, '');
   try {
     const okBtn = await waitForElement(() => Array.from(document.querySelectorAll('button, .jimu-btn')).find(b => b.textContent.trim() === 'OK')).catch(() => null);
     if (okBtn) {
@@ -70,9 +73,10 @@ export async function configureVegetationLayer({ scaleMin = '1:100', transparenc
     const rangeInput = await waitForElement('input.dijitInputInner');
     rangeInput.focus();
     rangeInput.select();
-    document.execCommand('insertText', false, scaleMin);
+    rangeInput.value = scale;
+    rangeInput.dispatchEvent(new Event('input', { bubbles: true }));
     rangeInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
-    log(`Visibility range set to ${scaleMin}`);
+    log(`Visibility range set to ${scale}`);
 
     if (!document.querySelector('.dijitTooltipContainer')) {
       menuBtn.click();
@@ -93,17 +97,21 @@ export async function configureVegetationLayer({ scaleMin = '1:100', transparenc
     const closeBtn = await waitForElement('.close-btn.jimu-float-trailing');
     closeBtn.click();
     log('Layer list closed');
+    console.timeEnd('[veg] total');
+    chrome.runtime.sendMessage({ type: 'veg:ready' });
   } catch (err) {
     console.error('[veg] error:', err);
+    chrome.runtime.sendMessage({ type: 'veg:error', error: err.message });
     throw err;
   }
 }
 
+export async function initVegLayer(options) {
+  await configureVegetationLayer(options);
+}
+
 chrome.runtime.onMessage.addListener((request) => {
-  if (request?.type === 'veg:init') {
-    configureVegetationLayer(request.options);
-  }
-  if (request?.type === 'veg:update') {
-    configureVegetationLayer(request.options);
+  if (request?.type === 'veg:init' || request?.type === 'veg:update') {
+    initVegLayer(request.options);
   }
 });
