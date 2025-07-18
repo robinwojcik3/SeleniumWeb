@@ -7,10 +7,11 @@ window.addEventListener('message', (event) => {
   }
   const data = event.data;
   if (data && data.type === 'coords' && data.payload) {
-    // Forward the coordinates to the background service worker
+    const { lat, lon } = data.payload;
     chrome.runtime.sendMessage({
       type: 'coords',
-      payload: data.payload
+      payload: { lat, lon },
+      options: data.options
     });
   }
 });

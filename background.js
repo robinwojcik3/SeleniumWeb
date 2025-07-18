@@ -6,11 +6,12 @@ let lastProcessed = 0;
 
 // Id of the ArcGIS tab reused between analyses
 let arcgisTabId = null;
+let lastVegOptions = { scaleMin: '1:100', transparency: 0.5 };
 
 // Send a veg:init message when the ArcGIS tab finishes loading
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (tabId === arcgisTabId && changeInfo.status === 'complete') {
-    chrome.tabs.sendMessage(tabId, { type: 'veg:init' });
+    chrome.tabs.sendMessage(tabId, { type: 'veg:init', options: lastVegOptions });
   }
 });
 
@@ -55,6 +56,9 @@ chrome.runtime.onMessage.addListener((message) => {
     return; // Ignore malformed messages
   }
 
+  lastVegOptions = message.options || lastVegOptions;
+  console.info('[bg] options', lastVegOptions);
+
   const now = Date.now();
   if (now - lastProcessed < 1000) {
     return; // Ignore events fired less than 1s apart
@@ -68,14 +72,27 @@ chrome.runtime.onMessage.addListener((message) => {
       if (chrome.runtime.lastError || !tab) {
         chrome.tabs.create({ url }).then((newTab) => {
           arcgisTabId = newTab.id;
+          chrome.tabs.sendMessage(newTab.id, {
+            type: 'veg:update',
+            options: lastVegOptions
+          });
         });
       } else {
-        chrome.tabs.update(arcgisTabId, { url, active: true });
+        chrome.tabs.update(arcgisTabId, { url, active: true }).then(() => {
+          chrome.tabs.sendMessage(arcgisTabId, {
+            type: 'veg:update',
+            options: lastVegOptions
+          });
+        });
       }
     });
   } else {
     chrome.tabs.create({ url }).then((newTab) => {
       arcgisTabId = newTab.id;
+      chrome.tabs.sendMessage(newTab.id, {
+        type: 'veg:update',
+        options: lastVegOptions
+      });
     });
   }
 });
