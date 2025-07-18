@@ -1,27 +1,35 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialisation de la carte avec une vue centrée sur Grenoble (exemple)
-    const map = L.map('map').setView([45.1885, 5.7245], 13); // Coordonnées de Grenoble
+// Le script est chargé après le corps du HTML, l'élément #map est donc garanti d'exister.
 
-    // Ajout du fond de carte OpenTopoMap
-    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        maxZoom: 17,
-        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-    }).addTo(map);
+// 1. Initialisation de la carte Leaflet
+// La vue est centrée sur Grenoble ([latitude, longitude], niveau de zoom).
+const map = L.map('map').setView([45.1885, 5.7245], 13);
 
-    let selectedMarker = null;
+// 2. Ajout d'un fond de carte (Tile Layer)
+// Utilisation d'OpenTopoMap pour un rendu topographique.
+L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+}).addTo(map);
 
-    // Gestionnaire d'événements pour le clic sur la carte
-    map.on('click', function(e) {
-        if (selectedMarker) {
-            map.removeLayer(selectedMarker); // Supprime l'ancien marqueur si existant
-        }
+// 3. Gestion de la sélection de points sur la carte
+let selectedMarker = null; // Variable pour stocker le marqueur actuel
 
-        // Ajoute un nouveau marqueur à l'emplacement du clic
-        selectedMarker = L.marker(e.latlng).addTo(map)
-            .bindPopup(`Point sélectionné : ${e.latlng.lat}, ${e.latlng.lng}`)
-            .openPopup();
+// Ajout d'un écouteur d'événement pour le clic sur la carte
+map.on('click', function(e) {
+    // Si un marqueur existe déjà, il est supprimé de la carte.
+    if (selectedMarker) {
+        map.removeLayer(selectedMarker);
+    }
 
-        console.log("Coordonnées sélectionnées :", e.latlng.lat, e.latlng.lng);
-        // Ici, les coordonnées (e.latlng.lat, e.latlng.lng) peuvent être utilisées pour lancer des analyses.
-    });
+    // Création d'un nouveau marqueur aux coordonnées du clic.
+    selectedMarker = L.marker(e.latlng).addTo(map);
+
+    // Ajout d'une popup au marqueur avec les coordonnées formatées.
+    selectedMarker.bindPopup(`<b>Coordonnées du point</b><br>Latitude: ${e.latlng.lat.toFixed(5)}<br>Longitude: ${e.latlng.lng.toFixed(5)}`).openPopup();
+
+    // Affiche les coordonnées dans la console du navigateur pour le débogage.
+    console.log(`Point sélectionné - Latitude: ${e.latlng.lat}, Longitude: ${e.latlng.lng}`);
+
+    // Les coordonnées (e.latlng) sont maintenant disponibles pour être envoyées
+    // à l'extension Chrome via un protocole de communication à définir.
 });
