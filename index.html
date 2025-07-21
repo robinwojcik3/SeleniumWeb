@@ -27,6 +27,7 @@
 <div id="status" style="padding:8px;font-family:sans-serif;"></div>
 <div id="map"></div>
 <div id="coords">Cliquez sur la carte pour afficher les coordonnées</div>
+<p><a id="soil-map-link" href="#" target="_blank" style="display:none; font-family:sans-serif;">Voir la carte des sols</a></p>
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 <script>
   // Initialise the map and its tile layer
@@ -88,6 +89,18 @@
     clearPending();
   }
 
+  function buildSoilUrl(lat, lon) {
+    return (
+      'https://www.geoportail.gouv.fr/carte' +
+      '?c=' + lon + ',' + lat +
+      '&z=12' +
+      '&l0=ORTHOIMAGERY.ORTHOPHOTOS::GEOPORTAIL:OGC:WMTS(1)' +
+      '&l1=GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR.CV::GEOPORTAIL:OGC:WMTS(1)' +
+      '&l2=INRA.CARTE.SOLS::GEOPORTAIL:OGC:WMTS(0.8)' +
+      '&permalink=yes'
+    );
+  }
+
   // When the user clicks on the map, show a confirmation popup
   map.on('click', function(e) {
     clearPending();
@@ -98,6 +111,9 @@
     // Display the clicked coordinates below the map
     document.getElementById('coords').textContent =
       'Latitude: ' + lat.toFixed(6) + ', Longitude: ' + lon.toFixed(6);
+    var soilLink = document.getElementById('soil-map-link');
+    soilLink.href = buildSoilUrl(lat, lon);
+    soilLink.style.display = 'inline';
 
     // Create a marker at the clicked position
     pendingMarker = L.marker([lat, lon]).addTo(map);
